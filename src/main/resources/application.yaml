@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    username: dragon_project
+    password: dragon_project
+    url: jdbc:mysql://localhost:3306/dragon_project
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    defer-datasource-initialization: true
+    
+  sql:
+    init:
+      mode: never  
+      
