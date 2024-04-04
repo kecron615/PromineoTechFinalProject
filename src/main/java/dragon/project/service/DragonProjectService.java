@@ -173,27 +173,7 @@ public class DragonProjectService {
 		house.setHouseName(houseData.getHouseName());
 		house.setHouseAllegiance(houseData.getHouseAllegiance());
 	}
-	
 
-	/*
-	 * public HouseData saveHouse(Long riderId, HouseData houseData, Long dragonId)
-	 * { Rider rider = findRiderById(riderId, dragonId); Long houseId =
-	 * houseData.getHouseId(); House house = findOrCreateHouse(riderId, houseId);
-	 * 
-	 * copyHouseFields(house);
-	 * 
-	 * rider.setRiderHouse(houses); house.getRider().add(rider);
-	 * 
-	 * House dbHouse = houseDao.save(house);
-	 * 
-	 * return new HouseData(dbHouse); }
-	 */
-	
-
-	private void copyHouseFields(House house, House house2) {
-		// TODO Auto-generated method stub
-		
-	}
 
 	private void copyHouseFields(House house, Rider rider) {
 		house.setHouseId(house.getHouseId());
