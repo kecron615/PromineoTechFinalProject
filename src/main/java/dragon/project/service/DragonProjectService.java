@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import dragon.project.controller.model.DragonData;
+import dragon.project.controller.model.HouseData;
 import dragon.project.controller.model.RiderData;
 import dragon.project.dao.DragonDao;
 import dragon.project.dao.HouseDao;
@@ -80,8 +80,6 @@ public class DragonProjectService {
 		}
 
 		return response;
-
-		// return dragonDao.findAll().stream().map(DragonData::new).toList();
 	}
 
 	@Transactional(readOnly = true)
@@ -100,18 +98,12 @@ public class DragonProjectService {
 	public RiderData saveRider(Long dragonId, RiderData riderData) {
 		Dragon dragon = findDragonById(dragonId);
 
-		Set<House> houses = houseDao.findAllByHouseIn(riderData.getHouses());
-
-		Rider rider = findOrCreateRider(riderData.getRiderId());
+		Rider rider = findOrCreateRider(riderData.getRiderId(), dragonId);
 		setRiderFields(rider, riderData);
 
 		rider.setDragon(dragon);
 		dragon.getRider().add(rider);
 
-		for (House house : houses) {
-			house.getRider().add(rider);
-			rider.getHouses().add(house);
-		}
 		Rider dbrider = riderDao.save(rider);
 		return new RiderData(dbrider);
 	}
@@ -125,32 +117,121 @@ public class DragonProjectService {
 
 	}
 
-	private Rider findOrCreateRider(Long riderId) {
+	private Rider findOrCreateRider(Long riderId, Long dragonId) {
 		Rider rider;
 
 		if (Objects.isNull(riderId)) {
 			rider = new Rider();
 		} else {
-			rider = findRiderById(riderId);
+			rider = findRiderById(riderId, dragonId);
 		}
 
 		return rider;
 	}
 
-	private Rider findRiderById(Long riderId) {
-		return riderDao.findById(riderId)
+	private Rider findRiderById(Long riderId, Long dragonId) {
+		Rider dbRider = riderDao.findById(riderId)
 				.orElseThrow(() -> new NoSuchElementException("Rider with ID=" + riderId + " does not exist."));
+		if (dbRider.getDragon().getDragonId() != dragonId) {
+			throw new IllegalStateException("Rider with ID={}" + riderId + " never rode dragon with ID={}" + dragonId);
+		}
+
+		return dbRider;
+
 	}
 
 	@Transactional(readOnly = true)
 	public RiderData retrieveRiderByID(Long dragonId, Long riderId) {
 		findDragonById(dragonId);
-		Rider rider = findRiderById(riderId);
+		Rider rider = findRiderById(riderId, dragonId);
 
 		if (rider.getDragon().getDragonId() != dragonId) {
 			throw new IllegalStateException("Rider with ID={}" + riderId + " never rode dragon with ID={}" + dragonId);
 		}
-		
+
 		return new RiderData(rider);
+	}
+	
+	@Transactional
+	public HouseData saveHouse(Long riderId, Long dragonId, HouseData houseData) {
+		Rider rider = findRiderById(riderId, dragonId);
+		Long houseId = houseData.getHouseId();
+		House house = findOrCreateHouse(riderId, houseId);
+		
+		copyHouseFields(house, houseData);
+		
+		rider.getHouses().add(house);
+		house.getRider().add(rider);
+		
+		House dbHouse = houseDao.save(house);
+		
+		return new HouseData(dbHouse);
+	}
+	private void copyHouseFields(House house, HouseData houseData) {
+
+		house.setHouseId(houseData.getHouseId());
+		house.setHouseName(houseData.getHouseName());
+		house.setHouseAllegiance(houseData.getHouseAllegiance());
+	}
+	
+
+	/*
+	 * public HouseData saveHouse(Long riderId, HouseData houseData, Long dragonId)
+	 * { Rider rider = findRiderById(riderId, dragonId); Long houseId =
+	 * houseData.getHouseId(); House house = findOrCreateHouse(riderId, houseId);
+	 * 
+	 * copyHouseFields(house);
+	 * 
+	 * rider.setRiderHouse(houses); house.getRider().add(rider);
+	 * 
+	 * House dbHouse = houseDao.save(house);
+	 * 
+	 * return new HouseData(dbHouse); }
+	 */
+	
+
+	private void copyHouseFields(House house, House house2) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void copyHouseFields(House house, Rider rider) {
+		house.setHouseId(house.getHouseId());
+		house.setHouseName(house.getHouseName());
+		house.setHouseAllegiance(house.getHouseAllegiance());
+	}
+
+	private House findOrCreateHouse(Long riderId, Long houseId) {
+		House house;
+		
+		if(Objects.isNull(houseId)) {
+			house = new House();
+		}
+		else {
+			throw new DuplicateKeyException("House with ID=" + houseId + " already exists");
+		}
+		return house;
+	}
+	
+	private House findHouseById(Long houseId, Long riderId) {
+		House house = houseDao.findById(houseId)
+				.orElseThrow(() -> new NoSuchElementException("House with Id=" + houseId + " does not exist."));
+		boolean found = false;
+		for (Rider rider : house.getRider()) {
+			if (rider.getRiderId()==(riderId)) {
+				found = true;
+				break;
+			} 
+		} 
+		if(!found) {
+			throw new IllegalArgumentException(
+					"Rider with ID=" + riderId + " not found for House with ID=" + houseId);
+		}
+		return house;
+	}
+
+	public HouseData retrieveHouseById(Long riderId, Long houseId) {
+
+		return new HouseData(findHouseById(houseId, riderId));
 	}
 }

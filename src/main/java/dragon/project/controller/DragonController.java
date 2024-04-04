@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import dragon.project.controller.model.DragonData;
+import dragon.project.controller.model.HouseData;
 import dragon.project.controller.model.RiderData;
 import dragon.project.service.DragonProjectService;
 import lombok.extern.slf4j.Slf4j;
@@ -87,5 +88,18 @@ public class DragonController {
 	public RiderData retrieveRiderById(@PathVariable Long dragonId, @PathVariable Long riderId) {
 		log.info("Retrieving rider with ID={} for dragon with ID={}", riderId, dragonId);
 		return dragonProjectService.retrieveRiderByID(dragonId, riderId);
+	}
+	
+	@PostMapping("/{riderId}/house")
+	@ResponseStatus(code = HttpStatus.CREATED)
+	public HouseData insertHouse(@PathVariable Long riderId, @RequestBody HouseData houseData, @PathVariable Long dragonId) {
+		log.info("Creating house with ID={} rider with ID={}", houseData, riderId);
+		return dragonProjectService.saveHouse(riderId, dragonId, houseData);
+	}
+	
+	@GetMapping("/{riderId}/house")
+	public HouseData retrieveHouseById(@PathVariable Long riderId, @PathVariable Long houseId) {
+		log.info("Retrieving house with ID={} for rider with ID{}", houseId, riderId);
+		return dragonProjectService.retrieveHouseById(riderId, houseId);
 	}
 }
