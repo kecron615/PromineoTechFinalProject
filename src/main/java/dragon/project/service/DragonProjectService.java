@@ -167,18 +167,12 @@ public class DragonProjectService {
 		
 		return new HouseData(dbHouse);
 	}
+	
 	private void copyHouseFields(House house, HouseData houseData) {
 
 		house.setHouseId(houseData.getHouseId());
 		house.setHouseName(houseData.getHouseName());
 		house.setHouseAllegiance(houseData.getHouseAllegiance());
-	}
-
-
-	private void copyHouseFields(House house, Rider rider) {
-		house.setHouseId(house.getHouseId());
-		house.setHouseName(house.getHouseName());
-		house.setHouseAllegiance(house.getHouseAllegiance());
 	}
 
 	private House findOrCreateHouse(Long riderId, Long houseId) {

@@ -24,6 +24,6 @@ public class House {
 	
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
-	@ManyToMany(mappedBy = "house")
+	@ManyToMany(mappedBy = "houses")
 	private Set<Rider> rider = new HashSet<>();
 }
