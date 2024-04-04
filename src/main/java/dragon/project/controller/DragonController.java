@@ -90,7 +90,7 @@ public class DragonController {
 		return dragonProjectService.retrieveRiderByID(dragonId, riderId);
 	}
 	
-	@PostMapping("/{riderId}/house")
+	@PostMapping("/dragon/{dragonId}/rider/{riderId}/house")
 	@ResponseStatus(code = HttpStatus.CREATED)
 	public HouseData insertHouse(@PathVariable Long riderId, @RequestBody HouseData houseData, @PathVariable Long dragonId) {
 		log.info("Creating house with ID={} rider with ID={}", houseData, riderId);

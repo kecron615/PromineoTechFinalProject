@@ -36,7 +36,7 @@ public class DragonProjectService {
 	@Transactional(readOnly = false)
 	public DragonData saveDragon(DragonData dragonData) {
 		Long dragonId = dragonData.getDragonId();
-		Dragon dragon = findOrCreateDragon(dragonId, dragonData.getDragonName());
+		Dragon dragon = findOrCreateDragon(dragonId, dragonData.getDragonName(), dragonData.getDragonColor());
 
 		setFieldsInDragon(dragon, dragonData);
 		return new DragonData(dragonDao.save(dragon));
@@ -44,10 +44,10 @@ public class DragonProjectService {
 
 	private void setFieldsInDragon(Dragon dragon, DragonData dragonData) {
 		dragon.setDragonName(dragonData.getDragonName());
-		dragon.setDragonColor(dragon.getDragonColor());
+		dragon.setDragonColor(dragonData.getDragonColor());
 	}
 
-	private Dragon findOrCreateDragon(Long dragonId, String dragonName) {
+	private Dragon findOrCreateDragon(Long dragonId, String dragonName, String dragonColor) {
 		Dragon dragon;
 
 		if (Objects.isNull(dragonId)) {
